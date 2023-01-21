@@ -1,7 +1,10 @@
 ﻿using System;
 using System.IO;
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Run = DocumentFormat.OpenXml.Wordprocessing.Run;
+using Table = DocumentFormat.OpenXml.Wordprocessing.Table;
 
 class Program
 {
@@ -23,7 +26,6 @@ class Program
     {
         // Specify the path of the Word document
         string wordFile = @"C:/Users/Romano/Desktop/TestWord.docx";
-
         // Open the Word document
         using (WordprocessingDocument doc = WordprocessingDocument.Open(wordFile, false))
         {
@@ -33,6 +35,10 @@ class Program
 
             // Specify the path of the text file
             string textFile = @"C:\Users\Romano\Desktop\TestOutput.txt";
+
+            KillWordAndTextfileProcess("", textFile);
+            // Rewrite the text file each time the program is run
+            File.WriteAllText(textFile, string.Empty);
 
             // Iterate through each table
             for (int i = 0; i < tables.Count(); i++)
@@ -76,7 +82,28 @@ class Program
                 // Write a new line after each table
                 File.AppendAllText(textFile, "\r\n");
             }
+            System.Diagnostics.Process.Start("explorer.exe", textFile);
         }
+    }
+
+    static void KillWordAndTextfileProcess(string wordFile, string textFile)
+    {
+        // Kill any processes associated with the Word document
+        System.Diagnostics.Process[] processes = System.Diagnostics.Process.GetProcessesByName("WINWORD");
+        foreach (System.Diagnostics.Process process in processes)
+        {
+            process.Kill();
+        }
+        // Delete the Word document
+        //File.Delete(wordFile);
+        // Kill any processes associated with the text file
+        processes = System.Diagnostics.Process.GetProcessesByName("notepad");
+        foreach (System.Diagnostics.Process process in processes)
+        {
+            process.Kill();
+        }
+        // Delete the text file
+        File.Delete(textFile);
     }
 
     static void ReadOnlyTableContentOnSteroids()
